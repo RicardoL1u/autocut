@@ -6,7 +6,7 @@ from typing import List, Any
 import numpy as np
 import srt
 import torch
-
+import pathlib
 from . import utils, whisper_model
 from .type import WhisperMode, SPEECH_ARRAY_INDEX
 
@@ -93,14 +93,19 @@ class Transcribe:
         speech_array_indices: List[SPEECH_ARRAY_INDEX],
     ) -> List[Any]:
         tic = time.time()
+        # if the self.args.prompt is empty use the filename from input as prompt
+        if self.args.prompt == "":
+            prompt = pathlib.Path(input).stem
+        else:
+            prompt = self.args.prompt
         res = (
             self.whisper_model.transcribe(
-                audio, speech_array_indices, self.args.lang, self.args.prompt
+                audio, speech_array_indices, self.args.lang, prompt
             )
             if self.args.whisper_mode == WhisperMode.WHISPER.value
             or self.args.whisper_mode == WhisperMode.FASTER.value
             else self.whisper_model.transcribe(
-                input, audio, speech_array_indices, self.args.lang, self.args.prompt
+                input, audio, speech_array_indices, self.args.lang, prompt
             )
         )
 
